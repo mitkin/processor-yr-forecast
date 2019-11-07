@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import argparse
 import xmltodict
@@ -26,8 +27,9 @@ def get_elevation(lon, lat):
     return elevation
 
 
-def make_forecast_message(mlist, step=12, days=3):
+def make_forecast_message(mlist, step=3, days=3):
     full_message = "".join(["---\nWeather forecast by MET Norway, delivered by NPI\n",
+        "WARNING: valid only at sea level\n",
         "Lat: {}, Lon: {}, Elev: {}\n".format(
                 mlist[0]['location']['@latitude'],
                 mlist[0]['location']['@longitude'],
@@ -36,7 +38,7 @@ def make_forecast_message(mlist, step=12, days=3):
     for elem in mlist[::step][0:int(24/step*days)]:
         message = "".join([
             'Date: {}\n'.format(elem['@to']),
-            '\tTemperature: {}, Pressure: {}, Wind: {} {}\n\n'.format(
+            '\tTemperature: {} deg C, Pressure: {} HPa, Wind: {} m/s {}\n\n'.format(
                 elem['location']['temperature']['@value'],
                 elem['location']['pressure']['@value'],
                 elem['location']['windSpeed']['@mps'],
@@ -71,7 +73,8 @@ def main():
         lat = request_dict['lat']
         lon = request_dict['lon']
 
-    msl = get_elevation(lon, lat)
+    # msl = get_elevation(lon, lat)
+    msl = 0
 
     api_request = "https://api.met.no/weatherapi/locationforecast/1.9/?lat={}&lon={}&msl={}".format(
             float(lat),
